@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Upload Resume</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <div class="logo">RB</div>
+      <div>
+        <div style="font-weight:600">Resume Builder</div>
+        <div style="font-size:12px;color:var(--muted)">Upload & parse PDF</div>
+      </div>
+    </a>
+    <nav>
+      <a class="btn" href="builder.html">Build</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="card" style="width:100%">
+      <h2 style="margin-top:0">Upload Your Resume (PDF)</h2>
+
+      <form id="uploadForm">
+        <label for="resumeFile">Choose PDF file</label>
+        <input id="resumeFile" type="file" name="resume" accept="application/pdf" required>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn">Upload & Parse</button>
+          <a href="builder.html" class="btn secondary">Skip & Edit</a>
+        </div>
+      </form>
+
+      <p id="status" class="status"></p>
+    </div>
+  </main>
+
+  <script>
+    const status = document.getElementById('status');
+    const form = document.getElementById('uploadForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = 'Parsing resume...';
+      const fileInput = document.getElementById('resumeFile');
+      if (!fileInput.files.length) { status.textContent = 'Please select a PDF.'; return; }
+
+      const formData = new FormData();
+      formData.append('resume', fileInput.files[0]);
+
+      try {
+        const res = await fetch('http://localhost:5000/upload', { method: 'POST', body: formData });
+        if (!res.ok) throw new Error('Upload failed');
+        const data = await res.json();
+        localStorage.setItem('resumeData', JSON.stringify(data));
+        window.location = 'builder.html';
+      } catch (err) {
+        status.textContent = 'Upload failed. Please try again.';
+      }
+    });
+  </script>
+
+</body>
+</html>
